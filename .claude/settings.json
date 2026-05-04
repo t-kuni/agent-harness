@@ -1,4 +1,13 @@
 {
+  "permissions": {
+    "allow": [
+      "Agent(web-researcher)"
+    ],
+    "deny": [
+      "WebSearch",
+      "WebFetch"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {
