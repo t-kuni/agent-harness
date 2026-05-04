@@ -6,10 +6,14 @@ description: 現在のタスクに必要なドメインハーネスを最小構�
 目的:
 現在のタスクに必要な domain harness を最小構成で作る。
 
+必須参照:
+新しいドメインハーネスを作る前に `harness/domains/README.md` を読む。
+slug 命名・標準ファイル構成・運用ルールは README を正本とする。
+
 手順:
 1. オーナー要求からドメイン名、完了条件、制約、入力、出力を抽出する。
 2. `harness/domains/` の既存候補を調べ、流用できるものがあれば再利用する。
-3. 足りなければ `harness/domains/<domain-slug>/` を新設し、`_template` を基に `overview.md`、`verification.md`、`sources.md` を作る。
+3. 足りなければ `harness/domains/<domain-slug>/` を新設し、`harness/domains/_template/` を基に `overview.md`、`verification.md`、`sources.md` を作る。
 4. `overview.md` には固有語彙、対象範囲、制約、主要成果物、参照すべき仕様をまとめる。
 5. `verification.md` には完了条件ごとの確認方法、実行入口、期待結果、手動確認点を書く。
 6. 決定論的検証を作れるなら、その入口を既存プロジェクト方式で追加し、`verification.md` に反映する。

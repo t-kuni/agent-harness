@@ -1,5 +1,12 @@
 # ドメインハーネスの作り方
 
+このファイルはドメインハーネスの構造・slug 命名・標準ファイル構成・運用ルールの正本である。
+skills や rules はここを参照し、同じ内容を重複して持たない。
+
+参照導線:
+- 新規作成時: `.claude/skills/bootstrap-domain-harness/SKILL.md`
+- 構造変更時: `.claude/rules/harness-editing.md`
+
 各ドメインは `harness/domains/<domain-slug>/` に置く。
 
 最低限のファイル:
