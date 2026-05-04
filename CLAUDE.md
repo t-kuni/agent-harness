@@ -10,6 +10,7 @@
 - 次に、対象パスに対応する `.claude/rules/` を守る。
 - 次に、必要時だけ `harness/meta/` と `harness/domains/` の SSoT を読む。
 - 手順が長い時は `.claude/skills/` を使う。
+- 外部ツールの使い方・一般的ベストプラクティスなど、ドメイン固有でない調査が必要な時は `research-prompt` スキルを使う。
 
 # 作業原則
 
