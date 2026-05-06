@@ -9,7 +9,7 @@
 - まずこのファイルを守る。
 - 次に、対象パスに対応する `.claude/rules/` を守る。
 - 次に、必要時だけ `harness/meta/` と `harness/domains/` の SSoT を読む。
-- 手順が長い時は `.claude/skills/` を使う。
+- スキルとして呼び出したい知識・手順は `.claude/skills/` を使う。
 - 調査が必要な時は後述の「リサーチ方針」を参照する。
 
 # 作業原則
@@ -25,7 +25,7 @@
 
 - 毎回必要な短い原則だけを `CLAUDE.md` に置く。
 - 対象パス限定の規則は `.claude/rules/` に置く。
-- 手順書・チェックリスト・反復ワークフローは `.claude/skills/` に置く。
+- frontmatter を索引としてスキル呼び出しで到達させたい任意の知識は `.claude/skills/` に置く。
 - 外部ツール接続は `.mcp.json` に置く。
 - 長文の知識本体は `harness/meta/` または `harness/domains/` に置く。
 
