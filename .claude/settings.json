@@ -15,6 +15,10 @@
           {
             "type": "command",
             "command": "bash .claude/hooks/check-harness-nav.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/suggest-improve-harness.sh"
           }
         ]
       }
