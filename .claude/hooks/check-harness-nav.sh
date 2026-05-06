@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 自然ハーネス（harness/meta/, harness/domains/）の各ファイルへの導線が
+# 自然ハーネス（harness/domains/）の各ファイルへの導線が
 # 特殊ハーネス（CLAUDE.md, .claude/**）に存在するか検査する。
 set -euo pipefail
 
@@ -13,7 +13,7 @@ while IFS= read -r file; do
     echo "⚠ 導線なし: $relpath"
     errors=$((errors + 1))
   fi
-done < <(find harness/meta harness/domains -type f \( -name "*.md" -o -name "*.yml" \) 2>/dev/null | sort)
+done < <(find harness/domains -type f \( -name "*.md" -o -name "*.yml" \) 2>/dev/null | sort)
 
 if [ $errors -gt 0 ]; then
   echo ""

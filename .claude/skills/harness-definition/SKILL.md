@@ -1,3 +1,8 @@
+---
+name: harness-definition
+description: ハーネスの概念定義・2×2分類・記述原則を参照する（ハーネス編集時に使用）
+---
+
 # 定義
 
 ## ハーネスの2軸分類
@@ -12,7 +17,7 @@
 |---|---|
 | `CLAUDE.md` | セッション開始時に自動読み込み（サブディレクトリも同様） |
 | `.claude/rules/**` | `paths:` frontmatter にマッチするファイル編集時に自動参照 |
-| `.claude/skills/**` | `description` frontmatter がスキル一覧として自動サーフェス |
+| `.claude/skills/**` | `description` frontmatter をエージェントが参照し、適切なタイミングで自動呼び出しする |
 | `.claude/hooks/**` | `settings.json` のイベント設定で自動実行 |
 | `.claude/settings.json` / `.mcp.json` | 直接参照 |
 
@@ -30,8 +35,8 @@
 
 |  | メタハーネス | ドメインハーネス |
 |---|---|---|
-| **特殊ハーネス** | `CLAUDE.md`、`harness-editing.md`（rules）、`improve-harness`（skill） | `verify-done`（skill）、`verification-design.md`（rules） |
-| **自然ハーネス** | `harness/meta/definition.md`、`file-routing.md`、`update-policy.md` など | `harness/domains/**/overview.md`、`verification.md`、`sources.md` など |
+| **特殊ハーネス** | `CLAUDE.md`、`harness-editing.md`（rules）、`improve-harness`、`harness-definition`、`harness-routing`、`harness-update-policy`、`owner-contract`（skills） | `verify-done`（skill）、`verification-design.md`（rules） |
+| **自然ハーネス** | （なし） | `harness/domains/**/overview.md`、`verification.md`、`sources.md` など |
 
 ---
 
