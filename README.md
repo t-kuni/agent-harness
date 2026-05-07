@@ -22,7 +22,7 @@ git init
 1. 上記コマンドでテンプレートを取得する
 2. Claude Code を起動する
 3. オーナーが「やりたい事」と「完了条件」を伝える
-4. エージェントが `/owner-contract` スキルで要求を正規化し、ドメインハーネスを構築・更新しながらタスクを遂行する
+4. エージェントがドメインハーネスを構築・更新しながらタスクを遂行する
 
 ## ファイル構成
 
@@ -31,18 +31,20 @@ git init
 ├── CLAUDE.md                          # 毎セッション読む短い運用原則
 ├── .gitignore
 ├── .mcp.json                          # 外部システム接続（初期は空）
+├── research/                          # 外部AIへのリサーチ依頼・結果の蓄積
 └── .claude/
     ├── settings.json                  # フックと実行時制御
+    ├── agents/
+    │   └── web-researcher.md          # Web検索専用サブエージェント定義
     ├── hooks/
-    │   └── suggest-improve-harness.sh # タスク完了後のハーネス改善示唆
-    ├── rules/
-    │   ├── harness-editing.md         # ハーネス文書編集時のルール
-    │   └── verification-design.md    # 検証設計時のルール
+    │   ├── suggest-improve-harness.sh # タスク完了後のハーネス改善示唆
+    │   └── strictly-enforced-rules.md # フック経由で強制されるルール
     └── skills/
         ├── bootstrap-domain-harness/  # ドメインハーネス作成・更新手順
         ├── harness-guide/             # ハーネス概念・配置先・更新ポリシー
         ├── improve-harness/           # タスク完了後のハーネス改善手順
-        ├── owner-contract/            # オーナー要求の正規化テンプレート
+        ├── random-word/               # ランダム単語取得（アイデア出し用）
+        ├── research-guide/            # Web検索のルール・手順
         ├── research-prompt/           # 外部AIへのリサーチ依頼プロンプト生成
         └── verify-done/               # 完了条件の検証手順
 ```
