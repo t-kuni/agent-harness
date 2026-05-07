@@ -1,6 +1,6 @@
 ---
 name: research-guide
-description: リサーチの種類・使い分け・ルールを参照する（リサーチ作業時に使用）
+description: what: リサーチ(web検索)の種類、ルール、手順 when: Web検索を用いてドメイン外の情報を調べたいとき
 ---
 
 ## リサーチの種類と使い分け
