@@ -10,7 +10,7 @@ description: ハーネスの概念定義・配置先判断・更新ポリシー�
 |  | メタハーネス | ドメインハーネス |
 |---|---|---|
 | **特殊ハーネス** | `CLAUDE.md`、`harness-editing.md`（rules）、`improve-harness`、`harness-guide`、`owner-contract`（skills） | `verify-done`（skill）、`verification-design.md`（rules） |
-| **自然ハーネス** | （なし） | `harness/domains/**/overview.md`、`verification.md`、`sources.md` など |
+| **自然ハーネス** | （なし） | タスクに応じた任意のフォルダ・ファイル（構造は都度設計する） |
 
 ---
 
@@ -55,11 +55,9 @@ description: ハーネスの概念定義・配置先判断・更新ポリシー�
 - 外部データ参照
 - 外部アクション実行
 
-## `harness/domains/` に置くもの
+## ドメインハーネス（自然ハーネス）に置くもの
 
-- ドメイン固有の知識
-- ドメイン固有の検証
-- ドメイン固有の参照元
+ドメイン固有の知識・検証・参照元。**フォルダ構造・ファイルフォーマット・配置先はタスクに応じて都度設計する。**既存ドメインへ統合できるなら新設しない。
 
 ## 新規ファイル追加の基準
 

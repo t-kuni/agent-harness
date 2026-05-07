@@ -1,6 +1,5 @@
 ---
 paths:
-  - "harness/domains/**/*.md"
   - "scripts/**"
   - "tools/**"
   - "Makefile"
@@ -14,5 +13,4 @@ paths:
 - 先に壊れを見つける検証から並べる。
 - 既存の verifier があるなら再利用する。
 - 新しい verifier を作る時は、できるだけ一つの入口から実行できるようにする。
-- `verification.md` と実際の実行入口を一致させる。
 - 手動確認だけに頼う場合は、何を見れば合格かを明記する。
