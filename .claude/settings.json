@@ -9,6 +9,16 @@
     ]
   },
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat .claude/hooks/strictly-enforced-rules.md"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
