@@ -12,14 +12,12 @@ description: 直近タスクを振り返り、遠回りを減らすためにハ�
 
 事前参照:
 ハーネス改善を行う前に以下を呼び出す:
-- `/harness-update-policy` — 更新すべきか判断する
-- `/harness-routing` — 配置先を決める
-- `/harness-definition` — 語彙・層の判断が必要な場合
+- `/harness-guide` — 更新すべきか・配置先・語彙・層の判断に使う
 
 手順:
 1. 直近タスクで詰まった箇所、探し直した箇所、曖昧だった完了条件を洗い出す。
 2. その原因が知識不足、配置ミス、検証不足、権限や外部連携不足のどれかを判定する。
-3. `/harness-routing` スキルに従い、更新先を `CLAUDE.md`、rules、skills、domain docs の中から選ぶ。
+3. `/harness-guide` スキルに従い、更新先を `CLAUDE.md`、rules、skills、domain docs の中から選ぶ。
 4. 新規追加より既存ファイルへの統合を優先する。
 5. 古くなった記述、重複記述、役割が重なった記述は削除または統合する。
 6. 完了条件の検証が弱かったなら `verification.md` と実際の verifier を更新する。
