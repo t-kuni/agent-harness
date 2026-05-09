@@ -34,6 +34,8 @@ AIエージェント(claude code)が参照する知識ファイルの総称。
 * ブラウザへの接続（playwright-cli attach）は禁止です。オーナーが予め実施しておきます
 * 作業開始前に `playwright-cli list` で接続状態を確認してください
     * 未接続の場合はオーナーに接続を依頼して、処理を中断してください
+* `.claude/skills/playwright-cli` は自動生成ファイルのため編集禁止です
+* コマンド実行時は必ずセッション名を明示してください（例：`playwright-cli -s=chrome goto ...`）
 
 # その他
 
