@@ -54,3 +54,15 @@ git init
 ## ハーネスとは
 
 AIエージェントがタスクを処理するのに必要な固有知識と、自己改善可能な運用知識の総体。詳細は `/harness-guide` スキルを参照。
+
+## playwright-cliを使用する手順
+
+chromeで `chrome://inspect/#remote-debugging` を開き、リモートデバッグを許可する
+
+```
+# インストール
+npm install -g @playwright/cli@latest
+playwright-cli install --skills
+# ブラウザに接続
+playwright-cli attach --cdp=chrome
+```
