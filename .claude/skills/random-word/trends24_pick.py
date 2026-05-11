@@ -6,7 +6,14 @@ import requests
 from bs4 import BeautifulSoup
 
 
-URL = "https://trends24.in/united-states/"
+REGIONS = {
+    "us": "united-states",
+    "japan": "japan",
+    "korea": "korea",
+    "uk": "united-kingdom",
+}
+
+BASE_URL = "https://trends24.in/{region}/"
 
 
 def fetch_html(url: str) -> str:
@@ -16,6 +23,7 @@ def fetch_html(url: str) -> str:
     }
     r = requests.get(url, headers=headers, timeout=20)
     r.raise_for_status()
+    r.encoding = r.apparent_encoding
     return r.text
 
 
@@ -47,9 +55,24 @@ def pick_random(trends: list[str], n: int) -> list[str]:
 
 
 def main():
-    n = int(sys.argv[1]) if len(sys.argv) > 1 else 10
+    args = sys.argv[1:]
 
-    html = fetch_html(URL)
+    region_key = "us"
+    n = 10
+
+    for arg in args:
+        if arg.startswith("--region="):
+            region_key = arg.split("=", 1)[1].lower()
+        else:
+            n = int(arg)
+
+    if region_key not in REGIONS:
+        valid = ", ".join(REGIONS.keys())
+        print(f"Error: unknown region '{region_key}'. valid: {valid}", file=sys.stderr)
+        sys.exit(1)
+
+    url = BASE_URL.format(region=REGIONS[region_key])
+    html = fetch_html(url)
     trends = extract_trends(html)
 
     picked = pick_random(trends, n)
