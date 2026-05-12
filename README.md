@@ -10,21 +10,34 @@ Claude Code を用いて、あらゆるタスクに適応可能なハーネス�
 
 ## 新規プロジェクトの開始
 
-```bash
-git clone https://github.com/t-kuni/agent-harness [プロジェクト名]
-cd [プロジェクト名]
-rm -rf .git
-git init
-```
-
-## 初期セットアップ
-
-リポジトリ取得後、以下のスクリプトを実行してください。  
-トレンドワード取得機能（random-word スキル）に必要な Python 仮想環境と依存パッケージが自動でセットアップされます。
+`PROJECT_NAME` にプロジェクト名を指定して実行する：
 
 ```bash
-bash setup.sh
+PROJECT_NAME=myproject bash <(curl -fsSL https://raw.githubusercontent.com/t-kuni/agent-harness/main/scripts/init-project.sh)
 ```
+
+その後、初期セットアップを実行する：
+
+```bash
+cd myproject
+bash scripts/setup.sh
+```
+
+`init-project.sh` は以下を自動実行する：
+
+1. このリポジトリをクローン
+2. クローン時点のコミットハッシュを `.harness-version` に記録
+3. `.git` を削除して独自リポジトリとして初期化
+
+## このリポジトリの更新を取り込む
+
+このリポジトリに更新が入った場合、派生先リポジトリで以下を実行する：
+
+```bash
+bash scripts/update-harness.sh
+```
+
+`/tmp` に一時クローンして差分を生成し、現在のブランチにコミットする。
 
 ## 使い方
 

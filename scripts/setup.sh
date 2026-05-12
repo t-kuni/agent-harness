@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV_DIR="$SCRIPT_DIR/.venv"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+VENV_DIR="$ROOT_DIR/.venv"
 
 echo "=== agent-harness セットアップ ==="
 
@@ -23,7 +23,7 @@ fi
 # 依存パッケージのインストール（random-word スキル用）
 echo "依存パッケージをインストールします..."
 "$VENV_DIR/bin/pip" install --quiet --upgrade pip
-"$VENV_DIR/bin/pip" install --quiet -r "$SCRIPT_DIR/.claude/skills/random-word/requirements.txt"
+"$VENV_DIR/bin/pip" install --quiet -r "$ROOT_DIR/.claude/skills/random-word/requirements.txt"
 
 echo ""
 echo "セットアップ完了。"
