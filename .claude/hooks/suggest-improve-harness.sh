@@ -3,14 +3,10 @@ set -euo pipefail
 
 INPUT="$(cat)"
 ACTIVE="$(jq -r '.stop_hook_active // false' <<< "$INPUT")"
-SESSION_ID="$(jq -r '.session_id // "unknown"' <<< "$INPUT")"
-SENTINEL="/tmp/auto-improve-harness-${SESSION_ID}.done"
 
-# 無限ループ防止：1セッション1回だけ発火
-if [[ "$ACTIVE" == "true" || -f "$SENTINEL" ]]; then
+# 無限ループ防止
+if [[ "$ACTIVE" == "true" ]]; then
   exit 0
 fi
 
-touch "$SENTINEL"
-
-jq -n '{ decision: "block", reason: "Before stopping, review this session for tool failures, permission errors, repeated attempts, or avoidable detours. If a concrete improvement to the harness exists, invoke /improve-harness. If no actionable improvement exists, state that briefly and finish." }'
+jq -n '{ decision: "block", reason: "このセッションの作業内容を振り返り、ハーネスに改善できる点がありそうか考えてください（追加の調査は不要）。改善できそうな点があれば、その内容を簡潔にオーナーに伝えて改善するかどうか確認してください。オーナーがYESと答えた場合のみ /improve-harness を実行してください。改善点がない場合は、その旨を簡潔に述べて終了してください。" }'
