@@ -37,8 +37,7 @@ while true; do
   if [ ! -s "$TASK_FILE" ]; then
     log "TASK.mdが空です。${WAIT_SECONDS}秒待機します..."
     sleep "$WAIT_SECONDS"
-    log "待機終了。ループを終了します。"
-    exit 0
+    continue
   fi
 
   log "タスクを検出しました。claude -p で処理を開始します..."
