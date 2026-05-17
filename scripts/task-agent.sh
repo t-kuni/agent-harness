@@ -1,17 +1,20 @@
 #!/bin/bash
 # TASK.mdの先頭タスクを順次処理するループスクリプト
-# 使い方: bash scripts/task-loop.sh [待機秒数]
+# 使い方: bash scripts/task-agent.sh [待機秒数]
+# 環境変数:
+#   CLAUDE_MODEL: 使用するモデル（デフォルト: claude-sonnet-4-6）
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 TASK_FILE="$PROJECT_DIR/TASK.md"
 WAIT_SECONDS="${1:-60}"
+CLAUDE_MODEL="${CLAUDE_MODEL:-claude-sonnet-4-6}"
 
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
 }
 
-log "タスク処理ループを開始します (TASK.md: $TASK_FILE, 待機時間: ${WAIT_SECONDS}秒)"
+log "タスク処理エージェントを開始します (TASK.md: $TASK_FILE, モデル: ${CLAUDE_MODEL}, 待機時間: ${WAIT_SECONDS}秒)"
 
 PROMPT='あなたはタスク処理エージェントです。以下の手順を実行してください。
 
@@ -40,12 +43,18 @@ while true; do
 
   log "タスクを検出しました。claude -p で処理を開始します..."
 
-  if cd "$PROJECT_DIR" && claude -p "$PROMPT"; then
+  cd "$PROJECT_DIR"
+  claude -p "$PROMPT" \
+    --model "$CLAUDE_MODEL" \
+    --dangerously-skip-permissions \
+    --verbose
+  EXIT_CODE=$?
+
+  if [ "$EXIT_CODE" -eq 0 ]; then
     log "タスク処理完了。"
   else
-    EXIT_CODE=$?
     log "エラー: claude -p が終了コード ${EXIT_CODE} で失敗しました。"
-    notify-send "タスク処理ループ エラー" "claude -p が失敗しました (終了コード: ${EXIT_CODE})" 2>/dev/null || true
+    notify-send "タスクエージェント エラー" "claude -p が失敗しました (終了コード: ${EXIT_CODE})" 2>/dev/null || true
     exit "$EXIT_CODE"
   fi
 done

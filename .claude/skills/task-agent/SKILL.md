@@ -1,23 +1,19 @@
 ---
 name: task-agent
-description: タスクエージェントを起動する。「タスクエージェントを起動して」「タスク処理ループを開始して」などの指示で使う。
+description: タスクエージェントを起動する。「タスクエージェントを起動して」「タスクキューを処理して」などの指示で使う。
 ---
 
 # タスクエージェント
 
-`scripts/task-agent.sh` をバックグラウンドで起動し、タスクキュー（TASK.md）のタスクを1件ずつ自動処理する。
+`scripts/task-agent.sh` をフォアグラウンドで起動し、タスクキュー（TASK.md）のタスクを1件ずつ自動処理する。
 
 ## 実行手順
 
-1. 以下のコマンドをバックグラウンドで実行する：
+1. 以下のコマンドをフォアグラウンドで実行する：
 
 ```bash
-bash scripts/task-agent.sh [待機秒数] > /tmp/task-agent.log 2>&1 &
-echo "PID: $!"
+bash scripts/task-agent.sh [待機秒数]
 ```
-
-2. PIDをオーナーに伝える
-3. ログは `/tmp/task-agent.log` で確認できることを伝える
 
 ## オプション
 
@@ -25,15 +21,7 @@ echo "PID: $!"
 
 ## 停止方法
 
-```bash
-kill <PID>
-```
-
-## ログ確認
-
-```bash
-tail -f /tmp/task-agent.log
-```
+実行中のターミナルで `Ctrl+C` を押す。
 
 ## 動作仕様
 
