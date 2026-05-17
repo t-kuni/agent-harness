@@ -47,8 +47,23 @@ while true; do
   claude -p "$PROMPT" \
     --model "$CLAUDE_MODEL" \
     --dangerously-skip-permissions \
-    --verbose
-  EXIT_CODE=$?
+    --verbose \
+    --output-format stream-json \
+    | while IFS= read -r line; do
+        echo "$line" | jq -r '
+          if .type == "assistant" then
+            (.message.content // [])[] |
+            if .type == "tool_use" then
+              "[TOOL] \(.name) \(.input | tostring | .[0:200])"
+            elif .type == "text" and (.text | length > 0) then
+              .text
+            else empty end
+          elif .type == "result" and .subtype == "error" then
+            "[ERROR] \(.result // "")"
+          else empty end
+        ' 2>/dev/null || true
+      done
+  EXIT_CODE="${PIPESTATUS[0]}"
 
   if [ "$EXIT_CODE" -eq 0 ]; then
     log "タスク処理完了。"
