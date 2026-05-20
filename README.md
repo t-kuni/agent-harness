@@ -46,33 +46,6 @@ bash scripts/update-harness.sh
 3. オーナーが「やりたい事」と「完了条件」を伝える
 4. エージェントがドメインハーネスを構築・更新しながらタスクを遂行する
 
-## ファイル構成
-
-```
-.
-├── CLAUDE.md                          # 毎セッション読む短い運用原則
-├── .gitignore
-├── .mcp.json                          # 外部システム接続（初期は空）
-├── research/                          # 外部AIへのリサーチ依頼・結果の蓄積
-└── .claude/
-    ├── settings.json                  # フックと実行時制御
-    ├── agents/
-    │   └── web-researcher.md          # Web検索専用サブエージェント定義
-    ├── hooks/
-    │   ├── suggest-improve-harness.sh # タスク完了後のハーネス改善示唆
-    │   └── strictly-enforced-rules.md # フック経由で強制されるルール
-    └── skills/
-        ├── bootstrap-domain-harness/  # ドメインハーネス作成・更新手順
-        ├── harness-guide/             # ハーネス概念・配置先・更新ポリシー
-        ├── improve-harness/           # タスク完了後のハーネス改善手順
-        ├── random-word/               # ランダム単語取得（アイデア出し用）
-        ├── research-guide/            # Web検索のルール・手順
-        ├── research-prompt/           # 外部AIへのリサーチ依頼プロンプト生成
-        └── verify-done/               # 完了条件の検証手順
-```
-
-ドメインハーネスはタスクに応じた任意のフォルダ・ファイルとして作成する（固定構造なし）。
-
 ## ハーネスとは
 
 AIエージェントがタスクを処理するのに必要な固有知識と、自己改善可能な運用知識の総体。詳細は `/harness-guide` スキルを参照。
