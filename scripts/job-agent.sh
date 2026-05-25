@@ -43,7 +43,7 @@ while true; do
   log "ジョブを検出しました。claude -p で処理を開始します..."
 
   cd "$PROJECT_DIR"
-  claude -p "$PROMPT" \
+  CLAUDE_JOB_AGENT=1 claude -p "$PROMPT" \
     --model "$CLAUDE_MODEL" \
     --dangerously-skip-permissions \
     --verbose \
