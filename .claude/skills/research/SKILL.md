@@ -28,8 +28,11 @@ description: リサーチを実行し、結果を research/ に保存する。We
    - 出力言語は日本語で行うよう明記する
    - 前提知識を持たない読者でも理解できる粒度にする
    - 作成者が検討した選択肢・仮説・好みは含めない。現状の事実だけを記述する（選択肢を提示すると外部AIの回答がその選択肢に縛られる）
-4. `research/<slug>/prompt.md` に保存する。slug はリサーチ課題を表す短い名詞句（単数・kebab-case）。
-5. 以下のコマンドを実行し、標準出力を `research/<slug>/result.md` に保存する。
+4. `research/<YYYYMMDD-HHMMSS-slug>/prompt.md` に保存する。
+   - `YYYYMMDD-HHMMSS` は `$(date +%Y%m%d-%H%M%S)` で取得した実行時刻
+   - `slug` はリサーチ課題を表す短い名詞句（単数・kebab-case）
+   - フォルダ名例：`20260530-153042-claude-hooks`
+5. 以下のコマンドを実行し、標準出力を `research/<YYYYMMDD-HHMMSS-slug>/result.md` に保存する。
    `<PROMPT_PATH>` と `<RESULT_PATH>` は実際の絶対パスに置き換える。
 
 ```bash
