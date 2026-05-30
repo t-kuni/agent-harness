@@ -21,7 +21,7 @@ codex exec \
   --ephemeral \
   --skip-git-repo-check \
   --config 'approval_policy="never"' \
-  "<PROMPT>" | tee "$CODEX_OUTPUT"
+  "<PROMPT>" 2>&1 | tee "$CODEX_OUTPUT"
 ```
 
 2. 出力からセッションIDを取得し、生成画像のパスを特定する
