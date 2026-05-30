@@ -1,13 +1,13 @@
 ---
 name: job-control
 description: >
-  what: ジョブキュー（JOB.md）とジョブエージェント（scripts/job-agent.sh）の知識
+  what: ジョブキュー（JOB.md）とジョブエージェント（meta-meta-scripts/job-agent.sh）の知識
   when: オーナーに明示的に指示された時のみ参照する。ジョブキューへの追加・ジョブエージェントの操作はオーナーの明示的な指示がない限り行わない。ジョブキューの追加を依頼された時
 ---
 
 # ジョブ制御機能
 
-ジョブキュー（JOB.md）とジョブエージェント（scripts/job-agent.sh）の総称。
+ジョブキュー（JOB.md）とジョブエージェント（meta-scripts/job-agent.sh）の総称。
 
 ## ジョブキュー（JOB.md）
 
@@ -22,9 +22,9 @@ description: >
     * ジョブ2の補足
 ```
 
-## ジョブエージェント（scripts/job-agent.sh）
+## ジョブエージェント（meta-scripts/job-agent.sh）
 
 ジョブキューを監視し、ジョブを1件ずつ自動処理するスクリプト。
 
-* 起動はオーナーが `scripts/job-agent.sh` を直接実行する
+* 起動はオーナーが `meta-scripts/job-agent.sh` を直接実行する
 * AIエージェントは自律的に起動・操作しない
