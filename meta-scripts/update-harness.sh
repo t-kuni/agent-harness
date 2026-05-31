@@ -1,6 +1,32 @@
 #!/usr/bin/env bash
 # このリポジトリ（agent-harness）の更新を取り込むスクリプト
 # 派生先リポジトリのルートで実行する
+#
+# 【ローカルでのテスト方法】
+# HARNESS_URL にローカルパスを指定することで GitHub クローンを省略できる。
+# コンフリクトのシナリオをテストする手順:
+#
+#   # 1. テスト用派生リポジトリを作成
+#   mkdir /tmp/test-derived && cd /tmp/test-derived && git init && git commit --allow-empty -m "init"
+#
+#   # 2. BASE をいくつか前のコミットに設定し、そのコミット時点のファイルをコピー
+#   BASE=$(git -C ~/path/to/agent-harness log --oneline | sed -n '3p' | awk '{print $1}')
+#   FULL_BASE=$(git -C ~/path/to/agent-harness rev-parse "$BASE")
+#   git -C ~/path/to/agent-harness show "$BASE:<ファイルパス>" > /tmp/test-derived/<ファイルパス>
+#   echo "$FULL_BASE" > .harness-version
+#   git add . && git commit -m "initial harness"
+#
+#   # 3. ローカルで変更を加えてコンフリクト要因を作る
+#   echo "# local change" >> <ファイルパス>
+#   git add . && git commit -m "local modification"
+#
+#   # 4. スクリプト実行
+#   HARNESS_URL=~/path/to/agent-harness bash ~/path/to/agent-harness/meta-scripts/update-harness.sh
+#
+# コンフリクト時の挙動:
+#   - 適用できたファイル → ワークツリーに反映（git status に modified で表示）
+#   - 適用できなかったハンク → <ファイル名>.rej に出力
+#   - 全体はロールバックされない（--reject による部分適用）
 set -euo pipefail
 
 HARNESS_URL="${HARNESS_URL:-https://github.com/t-kuni/agent-harness.git}"
@@ -39,11 +65,11 @@ echo "更新範囲: ${BASE:0:12}..${LATEST:0:12}"
 PATCH_FILE="$TMPDIR/harness-update.patch"
 git -C "$TMPDIR" diff --binary "$BASE" "$LATEST" > "$PATCH_FILE"
 
-if ! git apply --check --3way "$PATCH_FILE" 2>/dev/null; then
+if ! git apply --check "$PATCH_FILE" 2>/dev/null; then
   echo "警告: コンフリクトが発生します。手動での解決が必要です。"
 fi
 
-git apply --3way --reject "$PATCH_FILE" || {
+git apply --reject "$PATCH_FILE" || {
   echo ""
   echo "コンフリクトが発生しました。以下の手順で解決してください："
   echo "  1. git status でコンフリクトファイルを確認（<<<< マーカーあり）"
