@@ -43,20 +43,26 @@ if ! git apply --check --3way "$PATCH_FILE" 2>/dev/null; then
   echo "警告: コンフリクトが発生します。手動での解決が必要です。"
 fi
 
-git apply --3way --index "$PATCH_FILE" || {
+git apply --3way --reject "$PATCH_FILE" || {
   echo ""
   echo "コンフリクトが発生しました。以下の手順で解決してください："
-  echo "  1. git status でコンフリクトファイルを確認"
-  echo "  2. ファイルを編集して解決"
-  echo "  3. git add <解決したファイル>"
-  echo "  4. echo '$LATEST' > $VERSION_FILE && git add $VERSION_FILE"
-  echo "  5. git commit -m 'Apply harness updates ${BASE:0:12}..${LATEST:0:12}'"
+  echo "  1. git status でコンフリクトファイルを確認（<<<< マーカーあり）"
+  echo "  2. *.rej ファイルを確認して手動でマージ（適用できなかったハンク）"
+  echo "  3. *.rej ファイルを削除"
+  echo "  4. git add <解決したファイル>"
+  echo "  5. echo '$LATEST' > $VERSION_FILE && git add $VERSION_FILE"
+  echo "  6. git commit -m 'Apply harness updates ${BASE:0:12}..${LATEST:0:12}'"
+  echo ""
+  echo "コンフリクトのあるファイル:"
+  find . -name "*.rej" | sort
   exit 1
 }
 
 # ハーネスバージョンを更新
 printf '%s\n' "$LATEST" > "$VERSION_FILE"
-git add "$VERSION_FILE"
+
+# --index を使わないためワークツリーの変更を手動でステージ
+git add -A
 
 git commit -m "Apply harness updates ${BASE:0:12}..${LATEST:0:12}"
 
