@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # agent-harness から新規プロジェクトを初期化するスクリプト
 # curl でダウンロードして実行する想定：
-#   PROJECT_NAME=myproject bash <(curl -fsSL https://raw.githubusercontent.com/t-kuni/agent-harness/main/scripts/init-project.sh)
+#   PROJECT_NAME=myproject bash <(curl -fsSL https://raw.githubusercontent.com/t-kuni/agent-harness/main/meta-scripts/init-project.sh)
 set -euo pipefail
 
 HARNESS_URL="${HARNESS_URL:-https://github.com/t-kuni/agent-harness.git}"
@@ -35,7 +35,7 @@ echo "プロジェクト '$PROJECT_NAME' を作成しました。"
 echo ""
 echo "次のステップ："
 echo "  cd $PROJECT_NAME"
-echo "  bash scripts/setup.sh"
+echo "  bash meta-scripts/setup.sh"
 echo ""
 echo "agent-harness の更新を取り込む場合："
-echo "  bash scripts/update-harness.sh"
+echo "  bash meta-scripts/update-harness.sh"

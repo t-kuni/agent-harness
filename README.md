@@ -13,14 +13,14 @@ Claude Code を用いて、あらゆるタスクに適応可能なハーネス�
 `PROJECT_NAME` にプロジェクト名を指定して実行する：
 
 ```bash
-PROJECT_NAME=myproject bash <(curl -fsSL https://raw.githubusercontent.com/t-kuni/agent-harness/main/scripts/init-project.sh)
+PROJECT_NAME=myproject bash <(curl -fsSL https://raw.githubusercontent.com/t-kuni/agent-harness/main/meta-scripts/init-project.sh)
 ```
 
 その後、初期セットアップを実行する：
 
 ```bash
 cd myproject
-bash scripts/setup.sh
+bash meta-scripts/setup.sh
 ```
 
 `init-project.sh` は以下を自動実行する：
@@ -34,7 +34,7 @@ bash scripts/setup.sh
 このリポジトリに更新が入った場合、派生先リポジトリで以下を実行する：
 
 ```bash
-bash scripts/update-harness.sh
+bash meta-scripts/update-harness.sh
 ```
 
 `/tmp` に一時クローンして差分を生成し、現在のブランチにコミットする。
@@ -57,7 +57,7 @@ AIエージェントがタスクを処理するのに必要な固有知識と、
 **ジョブキュー（JOB.md）**
 処理待ちのジョブを管理するファイル。「〇〇をジョブキューに追加して」と指示すると追記される。上から順に処理され、完了したジョブは削除される。
 
-**ジョブエージェント（scripts/job-agent.sh）**
+**ジョブエージェント（meta-scripts/job-agent.sh）**
 ジョブキューを監視し、ジョブを1件ずつ自動処理するスクリプト。
 
 ## playwright-cliを使用する手順

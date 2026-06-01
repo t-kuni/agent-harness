@@ -1,6 +1,6 @@
 #!/bin/bash
 # JOB.mdの先頭ジョブを順次処理するループスクリプト
-# 使い方: bash scripts/job-agent.sh [待機秒数]
+# 使い方: bash meta-scripts/job-agent.sh [待機秒数]
 # 環境変数:
 #   CLAUDE_MODEL: 使用するモデル（デフォルト: claude-sonnet-4-6）
 
