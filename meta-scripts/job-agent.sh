@@ -1,20 +1,20 @@
 #!/bin/bash
 # JOB.mdの先頭ジョブを順次処理するループスクリプト
 # 使い方: bash meta-scripts/job-agent.sh [待機秒数]
-# 環境変数:
-#   CLAUDE_MODEL: 使用するモデル（デフォルト: claude-sonnet-4-6）
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 JOB_FILE="$PROJECT_DIR/JOB.md"
 WAIT_SECONDS="${1:-60}"
 CLAUDE_MODEL="${CLAUDE_MODEL:-claude-sonnet-4-6}"
+BASH_DEFAULT_TIMEOUT_MS="${BASH_DEFAULT_TIMEOUT_MS:-420000}"
+BASH_MAX_TIMEOUT_MS="${BASH_MAX_TIMEOUT_MS:-600000}"
 
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
 }
 
-log "ジョブ処理エージェントを開始します (JOB.md: $JOB_FILE, モデル: ${CLAUDE_MODEL}, 待機時間: ${WAIT_SECONDS}秒)"
+log "ジョブ処理エージェントを開始します (JOB.md: $JOB_FILE, モデル: ${CLAUDE_MODEL}, 待機時間: ${WAIT_SECONDS}秒, Bashタイムアウト: ${BASH_DEFAULT_TIMEOUT_MS}ms/${BASH_MAX_TIMEOUT_MS}ms)"
 
 PROMPT='あなたはジョブ処理エージェントです。以下の手順を実行してください。
 
@@ -43,7 +43,7 @@ while true; do
   log "ジョブを検出しました。claude -p で処理を開始します..."
 
   cd "$PROJECT_DIR"
-  CLAUDE_JOB_AGENT=1 claude -p "$PROMPT" \
+  CLAUDE_JOB_AGENT=1 CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1 BASH_DEFAULT_TIMEOUT_MS="$BASH_DEFAULT_TIMEOUT_MS" BASH_MAX_TIMEOUT_MS="$BASH_MAX_TIMEOUT_MS" claude -p "$PROMPT" \
     --model "$CLAUDE_MODEL" \
     --dangerously-skip-permissions \
     --verbose \

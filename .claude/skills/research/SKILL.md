@@ -5,6 +5,7 @@ description: リサーチを実行し、結果を research/ に保存する。We
 
 ## ルール
 
+- `codex exec` は `Bash` ツールで直接実行する（同期実行）。`TaskCreate` による非同期実行は禁止
 - メインエージェントは WebSearch・WebFetch を直接使用しない
 - 公式ドキュメントを最優先で参照する
 - ツールのバージョン差異に注意し、対象バージョンを確認する
