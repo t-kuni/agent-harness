@@ -5,8 +5,9 @@ description: リサーチを実行し、結果を research/ に保存する。We
 
 ## ルール
 
-- `codex exec` は `Bash` ツールで直接実行する（同期実行）。`TaskCreate` による非同期実行は禁止
-- Bashツールの `timeout` パラメータに最低 **600000ms（10分）** を指定する（デフォルト2分ではタイムアウトする）
+- `codex exec` は `Bash` ツールの `run_in_background: true` で起動する。`TaskCreate` による非同期実行は禁止
+  - リサーチはWeb検索を多数回行うため長時間かかることがあり、フォアグラウンド実行では `timeout` の最大値（600000ms＝10分）でも打ち切られることがある
+  - 完了はタスク通知で検知する。手動でのポーリング（`sleep` 等）は行わない
 - メインエージェントは WebSearch・WebFetch を直接使用しない
 - 公式ドキュメントを最優先で参照する
 - ツールのバージョン差異に注意し、対象バージョンを確認する
@@ -35,15 +36,12 @@ description: リサーチを実行し、結果を research/ に保存する。We
    - `YYYYMMDD-HHMMSS` は `$(date +%Y%m%d-%H%M%S)` で取得した実行時刻
    - `slug` はリサーチ課題を表す短い名詞句（単数・kebab-case）
    - フォルダ名例：`20260530-153042-claude-hooks`
-5. 以下のコマンドを実行し、標準出力を `research/<YYYYMMDD-HHMMSS-slug>/result.md` に保存する。
+5. 以下のコマンドを `Bash` ツールの `run_in_background: true` で実行し、標準出力を `research/<YYYYMMDD-HHMMSS-slug>/result.md` に保存する。
    `<PROMPT_PATH>` と `<RESULT_PATH>` は実際の絶対パスに置き換える。
 
 ```bash
 WORKDIR="$(mktemp -d /tmp/agent-harness-research.XXXXXX)"
-trap 'rm -rf "$WORKDIR"' EXIT
-cd "$WORKDIR" || exit 1
-
-codex exec \
+(codex exec \
   --model gpt-5.5 \
   --sandbox read-only \
   --ephemeral \
@@ -52,8 +50,10 @@ codex exec \
   --config 'model_reasoning_effort="high"' \
   --config 'web_search="live"' \
   "$(cat <PROMPT_PATH>)" \
-  > <RESULT_PATH>
+  > <RESULT_PATH> 2>"$WORKDIR/stderr.log"; rm -rf "$WORKDIR")
 ```
+
+タスク通知で完了を検知したら、`<RESULT_PATH>` の内容を確認し、「出力」セクションの内容を報告する。
 
 ## エラー時の対応
 
