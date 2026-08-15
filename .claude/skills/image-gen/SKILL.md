@@ -10,6 +10,10 @@ description: codexを用いて画像を生成し、リポジトリ内の指定�
 - codexは画像生成のみを担当する（セキュリティのため最小権限）
 - 生成画像のリポジトリへの移動は claude code の責務
 - 出力先パスがオーナーから指定されていない場合は確認する
+- リファレンス画像（キャラクター設定画・既存の生成物など）がある場合、必ず `codex exec` の `--image` オプションで渡す。テキストプロンプトだけで一貫性を保とうとしない
+  - `-i, --image <FILE>...` は複数値を取れるオプションのため、`--image path1 --image path2 "<prompt>"` のように書くと、プロンプト文字列まで `--image` の値として貪欲に読み込まれ、プロンプトが渡らずに失敗する
+  - 必ず画像パスをカンマ区切りでまとめ、`--` でプロンプトと明示的に区切ること：`--image path1,path2 -- "<PROMPT>"`
+  - プロンプト内で各画像の役割を明示する（例：「Image 1は○○のキャラクター設定画、Image 2は…」）
 
 ## 手順
 
@@ -23,6 +27,20 @@ codex exec \
   --ephemeral \
   --skip-git-repo-check \
   --config 'approval_policy="never"' \
+  "<PROMPT>" 2>&1 | tee "$CODEX_OUTPUT"
+```
+
+リファレンス画像を渡す場合は、上記コマンドの `"<PROMPT>"` の前に `--image <REF_IMAGE_1>,<REF_IMAGE_2>,... --` を挿入する（`<REF_IMAGE_n>` はリファレンス画像のパス）。
+
+```bash
+codex exec \
+  --model gpt-5.5 \
+  --sandbox read-only \
+  --ephemeral \
+  --skip-git-repo-check \
+  --config 'approval_policy="never"' \
+  --image <REF_IMAGE_1>,<REF_IMAGE_2> \
+  -- \
   "<PROMPT>" 2>&1 | tee "$CODEX_OUTPUT"
 ```
 
