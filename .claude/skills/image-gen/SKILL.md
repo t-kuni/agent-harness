@@ -67,13 +67,19 @@ cp "$GENERATED_IMAGE" <DEST_PATH_IN_REPO>
 - APIキー（`OPENAI_API_KEY`）はスクリプト内部でのみ環境変数として参照する。AIエージェント自身が `echo $OPENAI_API_KEY` 等でキーの値を参照・存在確認することは禁止
 - スクリプトの標準出力・標準エラー出力・実行結果の報告に、APIキーの値を含めない（含まれる出力があった場合はマスクする）
 - リファレンス画像がある場合は、スクリプトの第3引数（カンマ区切りの画像パス）で渡す
+- **解像度は必ず第4引数（`SIZE`、`WIDTHxHEIGHT`形式）で明示指定する**。省略時は `auto`（モデルが自動選択）となり、固定解像度にならない
+  - `/v1/images/generations`（参照画像なし）・`/v1/images/edits`（参照画像あり）の両エンドポイントに同じ `size` を渡す実装になっているため、呼び出し元が毎回同じ値を指定すれば、参照画像の有無によらず解像度を統一できる
+  - 呼び出し元スキル（例：`cut-first-frame-gen`）が要求する解像度（例：映像フォーマットの幅・高さ）をここに渡す
+  - `gpt-image-2` の `size` は、幅・高さが16の倍数、長辺:短辺が3:1以内、総ピクセル数655,360〜8,294,400の制約を満たす任意の値を指定できる
 
-参照画像なし（新規生成、`<PROMPT>` と `<DEST_PATH_IN_REPO>` を実際の値に置き換える）：
+参照画像なし（新規生成、`<PROMPT>`・`<DEST_PATH_IN_REPO>`・`<SIZE>` を実際の値に置き換える）：
 
 ```bash
 bash /home/kuni/Documents/agent-harness/.claude/skills/image-gen/scripts/generate_image.sh \
   "<PROMPT>" \
-  "<DEST_PATH_IN_REPO>"
+  "<DEST_PATH_IN_REPO>" \
+  "" \
+  "<SIZE>"
 ```
 
 参照画像あり（画像編集・合成、`<REF_IMAGE_1>,<REF_IMAGE_2>,...` はカンマ区切りでまとめる）：
@@ -82,7 +88,8 @@ bash /home/kuni/Documents/agent-harness/.claude/skills/image-gen/scripts/generat
 bash /home/kuni/Documents/agent-harness/.claude/skills/image-gen/scripts/generate_image.sh \
   "<PROMPT>" \
   "<DEST_PATH_IN_REPO>" \
-  "<REF_IMAGE_1>,<REF_IMAGE_2>"
+  "<REF_IMAGE_1>,<REF_IMAGE_2>" \
+  "<SIZE>"
 ```
 
 スクリプトの終了コードと `Saved: <path>` の出力を確認し、生成が成功したことを確かめる。

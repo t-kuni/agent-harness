@@ -2,18 +2,26 @@
 # OpenAI gpt-image-2 API を呼び出して画像を生成し、指定パスに保存する。
 #
 # 使い方:
-#   generate_image.sh <PROMPT> <OUTPUT_PATH> [REF_IMAGE_1,REF_IMAGE_2,...]
+#   generate_image.sh <PROMPT> <OUTPUT_PATH> [REF_IMAGE_1,REF_IMAGE_2,...] [SIZE]
 #
 # 前提:
 #   - 環境変数 OPENAI_API_KEY にAPIキーが設定されていること
 #     （このスクリプト自体がシェルの環境変数を参照する。呼び出し元のAIエージェントが
 #       環境変数を参照・存在確認する必要は無い）
 #   - jq コマンドが利用可能なこと
+#
+# SIZE:
+#   - `/v1/images/generations`・`/v1/images/edits` 両方に共通の `size` パラメータとして渡す
+#     （参照画像の有無でエンドポイントが変わっても解像度を統一するため）
+#   - 省略時は "auto"（モデルが自動選択、固定解像度ではない）
+#   - gpt-image-2 は "WIDTHxHEIGHT" 形式で任意解像度を指定できる
+#     （幅・高さが16の倍数、長辺:短辺が3:1以内、総ピクセル数655,360〜8,294,400の制約あり）
 set -euo pipefail
 
 PROMPT="${1:?PROMPT is required}"
 OUTPUT_PATH="${2:?OUTPUT_PATH is required}"
 REF_IMAGES="${3:-}"
+SIZE="${4:-auto}"
 
 if [ -z "${OPENAI_API_KEY:-}" ]; then
   echo "Error: OPENAI_API_KEY is not set" >&2
@@ -35,11 +43,12 @@ if [ -n "$REF_IMAGES" ]; then
     -F model="gpt-image-2" \
     "${CURL_FORM_ARGS[@]}" \
     -F prompt="${PROMPT}" \
+    -F size="${SIZE}" \
     -o "$TMP_RESPONSE"
 else
   # 参照画像なし: /v1/images/generations (application/json)
-  REQUEST_BODY="$(jq -n --arg model "gpt-image-2" --arg prompt "$PROMPT" \
-    '{model: $model, prompt: $prompt, size: "1024x1024", quality: "high", n: 1}')"
+  REQUEST_BODY="$(jq -n --arg model "gpt-image-2" --arg prompt "$PROMPT" --arg size "$SIZE" \
+    '{model: $model, prompt: $prompt, size: $size, quality: "high", n: 1}')"
   curl -sS "https://api.openai.com/v1/images/generations" \
     -H "Authorization: Bearer ${OPENAI_API_KEY}" \
     -H "Content-Type: application/json" \
