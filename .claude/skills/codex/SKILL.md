@@ -10,20 +10,20 @@ description: >
 OpenAI のコーディングエージェント CLI。コマンド名は `codex`。非対話（単発コマンド）実行は `codex exec` サブコマンド。
 
 * 契約プランは ChatGPT Plus（個人向け有料プラン）を前提とする
-* 調査時点: 2026-08-20
+* 調査時点: 2026-08-22
 
 ## 基本形
 
 ```bash
 codex exec \
   -C /abs/path/to/project \
-  -a never \
   --sandbox read-only \
   'プロンプト'
 ```
 
 * `[PROMPT]` を渡さない、または `-` を渡すと標準入力からプロンプトを読む。標準入力をパイプしつつ引数も渡した場合、標準入力は `<stdin>` ブロックとして追記される
-* `-a/--ask-for-approval` は承認方針。`untrusted`（信頼済みコマンドのみ無承認）／`on-request`（モデルが都度判断）／`never`（常に無承認、失敗はモデルにそのまま返る）。非対話実行で人間の承認待ちを起こしたくない場合は `never` を指定する
+* `-a/--ask-for-approval` オプションは削除済み（`codex exec --help` に存在しない）。`codex exec` は承認方針が常に `never` 相当で固定されており、明示指定なしで承認待ちなしに実行される（実行結果ヘッダーの `approval: never` で確認済み）。承認プロンプトを人間に出したい場合の手段は現状ない
+* 承認・サンドボックスまわりで現存するオプションは `-s/--sandbox`、`--approve-for-me`（自動レビュー経由でworkspace-write相当の承認を通す）、`--dangerously-bypass-approvals-and-sandbox`（全確認・サンドボックスを無効化。極めて危険なので使用しない）
 * `--skip-git-repo-check` を付けるとGitリポジトリ外でも実行できる
 * `--ephemeral` を付けるとセッションファイルをディスクに永続化しない
 * `-o/--output-last-message <FILE>` でエージェントの最終メッセージだけをファイルに書き出せる
@@ -34,7 +34,7 @@ codex exec \
 * `-C/--cd <DIR>` はエージェントの作業ルートを指定するオプション。`chroot` ではないため、これ単独では指定ディレクトリ以外を不可視化しない
 * `--add-dir <DIR>` は追加で書き込み可能にするディレクトリ。1ディレクトリのみに絞りたい場合は使わない
 * `--sandbox` は `read-only | workspace-write | danger-full-access` の3択
-  * `read-only`: 読み取り中心。編集・外部コマンド実行・ネットワーク越境は承認対象になる（`-a never` と組み合わせると失敗してモデルに返る）
+  * `read-only`: 読み取り中心。編集・外部コマンド実行・ネットワーク越境は承認対象になるが、`codex exec` は承認方針が常に無効なため、そのまま失敗としてモデルに返る
   * `workspace-write`: workspace内の読み書きと通常のローカルコマンドを許可。workspace外の編集やネットワークアクセスは承認対象
   * `danger-full-access`: サンドボックスなし。使用しない
 * `sandbox_workspace_write.writable_roots`（`-c` 経由）は `workspace-write` での追加書き込みルート。厳密運用では増やさない
@@ -44,7 +44,6 @@ codex exec \
 ```bash
 codex exec \
   -C /abs/path/to/project \
-  -a never \
   --sandbox read-only \
   -c 'default_permissions="workspace-only"' \
   -c 'permissions."workspace-only".extends=":workspace"' \
@@ -68,7 +67,6 @@ codex exec \
   -m gpt-5.6-sol \
   -c 'model_reasoning_effort="high"' \
   --sandbox read-only \
-  -a never \
   '設計上のリスクを洗い出してください'
 ```
 
@@ -85,7 +83,6 @@ codex exec \
   -C /abs/path/to/project \
   -m gpt-5.6-terra \
   --sandbox workspace-write \
-  -a never \
   'テストを追加して必要な修正を行ってください'
 ```
 
@@ -101,7 +98,6 @@ codex --search exec \
   -C /abs/path/to/project \
   -m gpt-5.6-sol \
   --sandbox read-only \
-  -a never \
   '最新の公式情報を検索して、この依存関係の移行方針を要約してください'
 ```
 
