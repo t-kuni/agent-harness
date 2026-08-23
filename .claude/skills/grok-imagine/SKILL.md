@@ -5,7 +5,8 @@ description: xAI Grok Imagine APIで画像・動画を生成し、リポジト�
 
 ## ルール
 
-- 画像生成には `scripts/generate_image.sh`、動画生成には `scripts/generate_video.sh` を使う（いずれもAPI直接呼び出し）
+- 画像生成には `scripts/generate_image.py`（Python）、動画生成には `scripts/generate_video.sh` を使う（いずれもAPI直接呼び出し）
+- `generate_image.py` の実行には `python-env` スキルに従い `.venv/bin/python` を使う（base64化した画像データをHTTPリクエストのJSONボディとして直接送信するため、シェル引数のARG_MAX制限を受けない）
 - APIキー（`XAI_API_KEY`）はスクリプト内部でのみ環境変数として参照する。AIエージェント自身が `echo $XAI_API_KEY` 等でキーの値を参照・存在確認することは禁止
 - スクリプトの標準出力・標準エラー出力・実行結果の報告に、APIキーの値を含めない（含まれる出力があった場合はマスクする）
 - 参照画像（キャラクター設定画・既存の生成物など）がある場合、画像生成では必ずスクリプトの第3引数（カンマ区切りの画像パス、最大3枚）で渡す。テキストプロンプトだけで一貫性を保とうとしない
@@ -15,12 +16,12 @@ description: xAI Grok Imagine APIで画像・動画を生成し、リポジト�
 
 ## 手順（画像生成）
 
-1. `scripts/generate_image.sh` を実行する
+1. `scripts/generate_image.py` を実行する
 
 参照画像なし（新規生成、`<PROMPT>`・`<DEST_PATH_IN_REPO>` を実際の値に置き換える。第4引数はアスペクト比、第5引数は解像度で省略可）：
 
 ```bash
-bash /home/kuni/Documents/agent-harness/.claude/skills/grok-imagine/scripts/generate_image.sh \
+/home/kuni/Documents/agent-harness/.venv/bin/python /home/kuni/Documents/agent-harness/.claude/skills/grok-imagine/scripts/generate_image.py \
   "<PROMPT>" \
   "<DEST_PATH_IN_REPO>" \
   "" \
@@ -34,7 +35,7 @@ bash /home/kuni/Documents/agent-harness/.claude/skills/grok-imagine/scripts/gene
 参照画像あり（画像編集・合成、`<REF_IMAGE_1>,<REF_IMAGE_2>,...` はカンマ区切りで最大3枚まで）：
 
 ```bash
-bash /home/kuni/Documents/agent-harness/.claude/skills/grok-imagine/scripts/generate_image.sh \
+/home/kuni/Documents/agent-harness/.venv/bin/python /home/kuni/Documents/agent-harness/.claude/skills/grok-imagine/scripts/generate_image.py \
   "<PROMPT>" \
   "<DEST_PATH_IN_REPO>" \
   "<REF_IMAGE_1>,<REF_IMAGE_2>" \
