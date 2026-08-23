@@ -9,6 +9,11 @@ description: >
 
 Google の Antigravity CLI。旧 Gemini CLI の後継であり、コマンド名は `agy`。
 
+## 起動方法
+
+* `agy -p` はBashツール経由で起動し、`run_in_background: true` を指定する
+* 理由：実行に10分以上かかることがあるため
+
 * 契約プランは Google AI Pro（個人向け有料プラン）を前提とする
 * 調査・実機確認時点のバージョン: `1.1.16`
 

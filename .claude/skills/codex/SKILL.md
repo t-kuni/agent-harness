@@ -9,6 +9,11 @@ description: >
 
 OpenAI のコーディングエージェント CLI。コマンド名は `codex`。非対話（単発コマンド）実行は `codex exec` サブコマンド。
 
+## 起動方法
+
+* `codex exec` はBashツール経由で起動し、`run_in_background: true` を指定する
+* 理由：実行に10分以上かかることがあるため
+
 * 契約プランは ChatGPT Plus（個人向け有料プラン）を前提とする
 * 調査時点: 2026-08-22
 
