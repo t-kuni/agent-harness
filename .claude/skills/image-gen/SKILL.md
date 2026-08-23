@@ -1,13 +1,15 @@
 ---
 name: image-gen
-description: 画像を生成し、リポジトリ内の指定パスにコピーする。「画像を生成して」「画像を作って」などの指示で使う。デフォルトはOpenAI gpt-image-2 API直接呼び出し（スクリプト方式）。オーナーの明示的な指示がある場合のみcodex方式を使う。
+description: 画像を生成し、リポジトリ内の指定パスにコピーする。「画像を生成して」「画像を作って」などの指示で使う。デフォルトはOpenAI gpt-image-2 API直接呼び出し（スクリプト方式）。オーナーの明示的な指示がある場合のみcodex方式・Gemini API方式（nano banana2）を使う。
 ---
 
 ## ルール
 
-- 明示的な指示がない限り、`scripts/generate_image.sh` によるOpenAI `gpt-image-2` API直接呼び出し（スクリプト方式）を使う
+- 明示的な指示がない限り、`scripts/generate_image.py` によるOpenAI `gpt-image-2` API直接呼び出し（スクリプト方式）を使う
 - codex方式（`codex exec`）は、オーナーが明示的に指示した場合のみ使う
-- APIキー（`OPENAI_API_KEY`）はスクリプト内部でのみ環境変数として参照する。AIエージェント自身が `echo $OPENAI_API_KEY` 等でキーの値を参照・存在確認することは禁止
+- Gemini API方式（`gemini-3.1-flash-image`、通称nano banana2）は、オーナーが明示的にGemini/nano banana2を指定した場合のみ使うサブ手段とする
+- スクリプトは Python 製で `.venv` 経由で実行する（`python-env` スキル参照）。`.venv` が無い場合は `meta-scripts/setup.sh` でセットアップする
+- APIキー（`OPENAI_API_KEY`・`GEMINI_API_KEY`）はスクリプト内部でのみ環境変数として参照する。AIエージェント自身が `echo $OPENAI_API_KEY` 等でキーの値を参照・存在確認することは禁止
 - スクリプトの標準出力・標準エラー出力・実行結果の報告に、APIキーの値を含めない（含まれる出力があった場合はマスクする）
 - リファレンス画像（キャラクター設定画・既存の生成物など）がある場合、必ずスクリプトの第3引数（カンマ区切りの画像パス）で渡す。テキストプロンプトだけで一貫性を保とうとしない
 - **解像度は必ず第4引数（`SIZE`、`WIDTHxHEIGHT`形式）で明示指定する**。省略時は `auto`（モデルが自動選択）となり、固定解像度にならない
@@ -18,12 +20,13 @@ description: 画像を生成し、リポジトリ内の指定パスにコピー�
 
 ## 手順（スクリプト方式）
 
-1. `scripts/generate_image.sh` を実行する
+1. `scripts/generate_image.py` を実行する
 
 参照画像なし（新規生成、`<PROMPT>`・`<DEST_PATH_IN_REPO>`・`<SIZE>` を実際の値に置き換える）：
 
 ```bash
-bash /home/kuni/Documents/agent-harness/.claude/skills/image-gen/scripts/generate_image.sh \
+/home/kuni/Documents/agent-harness/.venv/bin/python \
+  /home/kuni/Documents/agent-harness/.claude/skills/image-gen/scripts/generate_image.py \
   "<PROMPT>" \
   "<DEST_PATH_IN_REPO>" \
   "" \
@@ -33,7 +36,8 @@ bash /home/kuni/Documents/agent-harness/.claude/skills/image-gen/scripts/generat
 参照画像あり（画像編集・合成、`<REF_IMAGE_1>,<REF_IMAGE_2>,...` はカンマ区切りでまとめる）：
 
 ```bash
-bash /home/kuni/Documents/agent-harness/.claude/skills/image-gen/scripts/generate_image.sh \
+/home/kuni/Documents/agent-harness/.venv/bin/python \
+  /home/kuni/Documents/agent-harness/.claude/skills/image-gen/scripts/generate_image.py \
   "<PROMPT>" \
   "<DEST_PATH_IN_REPO>" \
   "<REF_IMAGE_1>,<REF_IMAGE_2>" \
@@ -103,8 +107,56 @@ GENERATED_IMAGE=$(ls ~/.codex/generated_images/$SESSION_ID/*.png 2>/dev/null | h
 cp "$GENERATED_IMAGE" <DEST_PATH_IN_REPO>
 ```
 
+## 参考：Gemini API方式（オーナーが明示的にGemini/nano banana2を指定した場合のみ使用）
+
+- 正式モデル名は **Gemini 3.1 Flash Image**（モデルID `gemini-3.1-flash-image`）、通称 **nano banana2**
+- `scripts/generate_image_gemini.py` によるGemini API（Interactions API、`POST /v1beta/interactions`）直接呼び出し
+- APIキー（`GEMINI_API_KEY`）はスクリプト内部でのみ環境変数として参照する。AIエージェント自身がキーの値を参照・存在確認することは禁止
+- スクリプトの標準出力・標準エラー出力・実行結果の報告に、APIキーの値を含めない（含まれる出力があった場合はマスクする）
+- OpenAI方式（`gpt-image-2`）との構造的な違い
+  - エンドポイントは参照画像の有無によらず単一（`/v1beta/interactions`）。OpenAI方式のように generations/edits で分かれていない
+  - 解像度は `WIDTHxHEIGHT` の任意指定ではなく、`ASPECT_RATIO`（比率）＋`IMAGE_SIZE`（サイズクラス）の組み合わせで指定する
+    - `ASPECT_RATIO`: `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`, `1:8`, `8:1`, `1:4`, `4:1`（省略時 `16:9`）
+    - `IMAGE_SIZE`: `512`, `1K`, `2K`, `4K`（省略時 `1K`。`512` は `gemini-3.1-flash-image` のみ対応）
+  - 参照画像は複数枚渡せる（高忠実度オブジェクト最大10枚、キャラクター一貫性用途は最大4枚が目安）
+  - 参照画像はBase64化してJSONボディに直接埋め込む実装（Python版）。シェル版は`jq --arg`に長大なBase64文字列を渡す実装だったため、大きめの参照画像でOSの引数長上限（ARG_MAX）を超えて失敗する不具合があった
+- リファレンス画像がある場合、必ずスクリプトの第3引数（カンマ区切りの画像パス）で渡す。テキストプロンプトだけで一貫性を保とうとしない
+- 出力先パスがオーナーから指定されていない場合は確認する
+
+手順：
+
+1. `scripts/generate_image_gemini.py` を実行する
+
+参照画像なし（新規生成、`<PROMPT>`・`<DEST_PATH_IN_REPO>`・`<ASPECT_RATIO>`・`<IMAGE_SIZE>` を実際の値に置き換える）：
+
+```bash
+/home/kuni/Documents/agent-harness/.venv/bin/python \
+  /home/kuni/Documents/agent-harness/.claude/skills/image-gen/scripts/generate_image_gemini.py \
+  "<PROMPT>" \
+  "<DEST_PATH_IN_REPO>" \
+  "" \
+  "<ASPECT_RATIO>" \
+  "<IMAGE_SIZE>"
+```
+
+参照画像あり（画像編集・合成、`<REF_IMAGE_1>,<REF_IMAGE_2>,...` はカンマ区切りでまとめる）：
+
+```bash
+/home/kuni/Documents/agent-harness/.venv/bin/python \
+  /home/kuni/Documents/agent-harness/.claude/skills/image-gen/scripts/generate_image_gemini.py \
+  "<PROMPT>" \
+  "<DEST_PATH_IN_REPO>" \
+  "<REF_IMAGE_1>,<REF_IMAGE_2>" \
+  "<ASPECT_RATIO>" \
+  "<IMAGE_SIZE>"
+```
+
+2. スクリプトの終了コードと `Saved: <path>` の出力を確認し、生成が成功したことを確かめる
+
+エラー時、代替手段で自己解決せず、オーナーにエラー内容を報告し指示を仰ぐ（APIキーの値は含めない）。
+
 ## 出力
 
 - コピー先のパス
 - 何を生成したかの説明（1行）
-- スクリプト方式・codex方式のどちらで生成したか
+- スクリプト方式（OpenAI）・codex方式・Gemini API方式のいずれで生成したか

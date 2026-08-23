@@ -20,10 +20,11 @@ else
   echo "既存の venv を使用します: $VENV_DIR"
 fi
 
-# 依存パッケージのインストール（random-word スキル用）
+# 依存パッケージのインストール（random-word スキル用、image-gen スキル用）
 echo "依存パッケージをインストールします..."
 "$VENV_DIR/bin/pip" install --quiet --upgrade pip
 "$VENV_DIR/bin/pip" install --quiet -r "$ROOT_DIR/.claude/skills/random-word/requirements.txt"
+"$VENV_DIR/bin/pip" install --quiet -r "$ROOT_DIR/.claude/skills/image-gen/scripts/requirements.txt"
 
 echo ""
 echo "セットアップ完了。"
