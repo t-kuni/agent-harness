@@ -78,6 +78,7 @@ def main() -> None:
             "model": MODEL,
             "prompt": prompt,
             "images": images,
+            "aspect_ratio": aspect_ratio,
             "resolution": resolution,
             "response_format": "b64_json",
         }

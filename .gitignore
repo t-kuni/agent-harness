@@ -3,3 +3,4 @@ CLAUDE.local.md
 .venv/
 .playwright
 .playwright-cli
+__pycache__/
