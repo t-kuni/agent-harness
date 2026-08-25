@@ -122,10 +122,11 @@ cp "$GENERATED_IMAGE" <DEST_PATH_IN_REPO>
   - 参照画像はBase64化してJSONボディに直接埋め込む実装（Python版）。シェル版は`jq --arg`に長大なBase64文字列を渡す実装だったため、大きめの参照画像でOSの引数長上限（ARG_MAX）を超えて失敗する不具合があった
 - リファレンス画像がある場合、必ずスクリプトの第3引数（カンマ区切りの画像パス）で渡す。テキストプロンプトだけで一貫性を保とうとしない
 - 出力先パスがオーナーから指定されていない場合は確認する
+- `generate_image_gemini.py` は生成に2分（Bashツールのデフォルトタイムアウト）を超える時間がかかることがある。**必ず `Bash` ツールの `run_in_background: true` で起動し、完了通知（task-notification）を待つ**。フォアグラウンド実行でタイムアウトさせない
 
 手順：
 
-1. `scripts/generate_image_gemini.py` を実行する
+1. `scripts/generate_image_gemini.py` を `run_in_background: true` で実行する
 
 参照画像なし（新規生成、`<PROMPT>`・`<DEST_PATH_IN_REPO>`・`<ASPECT_RATIO>`・`<IMAGE_SIZE>` を実際の値に置き換える）：
 
