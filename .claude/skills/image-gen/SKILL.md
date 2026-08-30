@@ -17,7 +17,12 @@ description: 画像を生成し、リポジトリ内の指定パスにコピー�
   - `/v1/images/generations`（参照画像なし）・`/v1/images/edits`（参照画像あり）の両エンドポイントに同じ `size` を渡す実装になっているため、呼び出し元が毎回同じ値を指定すれば、参照画像の有無によらず解像度を統一できる
   - 呼び出し元スキル（例：`cut-first-frame-gen`）が要求する解像度（例：映像フォーマットの幅・高さ）をここに渡す
   - `gpt-image-2` の `size` は、幅・高さが16の倍数、長辺:短辺が3:1以内、総ピクセル数655,360〜8,294,400の制約を満たす任意の値を指定できる
+- 複数枚を一度に生成したい場合、第5引数（`N`）に枚数を指定する。省略時は1枚
+  - `gpt-image-2` の `n` パラメータの制約により1〜10の範囲で指定できる。参照画像あり（`/v1/images/edits`）・なし（`/v1/images/generations`）の両方で使える
+  - 料金は1枚あたりの単価がそのまま枚数分乗算される（割引なし）
+  - 2枚以上を指定すると、`DEST_PATH_IN_REPO` の拡張子の前に `_1`, `_2`, ... の連番を付けてそれぞれ保存する（例：`out.png` → `out_1.png`, `out_2.png`）
 - 出力先パスがオーナーから指定されていない場合は確認する
+- **出力先パスに既存ファイルがある場合、上書きせず拡張子の前に連番を付けて保存する**（例：`out.png` が既にあれば `out_2.png`、それもあれば `out_3.png`、…）。この上書き回避は全方式（スクリプト方式・Gemini API方式・MiniMax API方式）共通の挙動
 - `scripts/generate_image.py` は生成に2分（Bashツールのデフォルトタイムアウト）を超える時間がかかることがある。**必ず `Bash` ツールの `run_in_background: true` で起動し、完了通知（task-notification）を待つ**。フォアグラウンド実行でタイムアウトさせない
 
 ## 手順（スクリプト方式）
@@ -46,7 +51,19 @@ description: 画像を生成し、リポジトリ内の指定パスにコピー�
   "<SIZE>"
 ```
 
-2. スクリプトの終了コードと `Saved: <path>` の出力を確認し、生成が成功したことを確かめる
+複数枚を一度に生成する場合（第5引数に枚数`<N>`を指定、1〜10）：
+
+```bash
+/home/kuni/Documents/agent-harness/.venv/bin/python \
+  /home/kuni/Documents/agent-harness/.claude/skills/image-gen/scripts/generate_image.py \
+  "<PROMPT>" \
+  "<DEST_PATH_IN_REPO>" \
+  "<REF_IMAGE_1>,<REF_IMAGE_2>" \
+  "<SIZE>" \
+  "<N>"
+```
+
+2. スクリプトの終了コードと `Saved: <path>` の出力（枚数分出力される）を確認し、生成が成功したことを確かめる
 
 ## エラー時の対応（スクリプト方式）
 
@@ -174,6 +191,10 @@ cp "$GENERATED_IMAGE" <DEST_PATH_IN_REPO>
   - 料金は1枚あたり約$0.0035と、OpenAI（$0.006〜0.211）・Gemini（$0.045〜0.151）より大幅に安い
   - レート制限は10 RPM（分間10リクエスト）
 - リファレンス画像がある場合、必ずスクリプトの第3引数（画像パス、1枚のみ）で渡す。テキストプロンプトだけで一貫性を保とうとしない
+- 複数枚を一度に生成したい場合、第5引数（`N`）に枚数を指定する。省略時は1枚
+  - `image-01` の `n` パラメータの制約により1〜9の範囲で指定できる。Text-to-Image・Image-to-Image（参照画像あり）の両方で使える
+  - 料金は1枚あたり約$0.0035の単価がそのまま枚数分乗算される（割引なし）
+  - 2枚以上を指定すると、`DEST_PATH_IN_REPO` の拡張子の前に `_1`, `_2`, ... の連番を付けてそれぞれ保存する（例：`out.png` → `out_1.png`, `out_2.png`）
 - 出力先パスがオーナーから指定されていない場合は確認する
 
 手順：
@@ -202,7 +223,19 @@ cp "$GENERATED_IMAGE" <DEST_PATH_IN_REPO>
   "<ASPECT_RATIO>"
 ```
 
-2. スクリプトの終了コードと `Saved: <path>` の出力を確認し、生成が成功したことを確かめる
+複数枚を一度に生成する場合（第5引数に枚数`<N>`を指定、1〜9）：
+
+```bash
+/home/kuni/Documents/agent-harness/.venv/bin/python \
+  /home/kuni/Documents/agent-harness/.claude/skills/image-gen/scripts/generate_image_minimax.py \
+  "<PROMPT>" \
+  "<DEST_PATH_IN_REPO>" \
+  "<REF_IMAGE>" \
+  "<ASPECT_RATIO>" \
+  "<N>"
+```
+
+2. スクリプトの終了コードと `Saved: <path>` の出力（枚数分出力される）を確認し、生成が成功したことを確かめる
 
 エラー時、代替手段で自己解決せず、オーナーにエラー内容を報告し指示を仰ぐ（APIキーの値は含めない）。
 

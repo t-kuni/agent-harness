@@ -40,6 +40,18 @@ def guess_mime(path: str) -> str:
     }.get(ext, "image/png")
 
 
+def avoid_overwrite(path: Path) -> Path:
+    """pathがすでに存在する場合、拡張子の前に連番を付けて空いているパスを返す。"""
+    if not path.exists():
+        return path
+    i = 2
+    while True:
+        candidate = path.with_name(f"{path.stem}_{i}{path.suffix}")
+        if not candidate.exists():
+            return candidate
+        i += 1
+
+
 def main() -> int:
     if len(sys.argv) < 3:
         print(
@@ -112,11 +124,11 @@ def main() -> int:
         print("Error: unexpected response shape from Gemini API (no image found)", file=sys.stderr)
         return 1
 
-    out_path = Path(output_path)
+    out_path = avoid_overwrite(Path(output_path))
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_bytes(base64.b64decode(image_data))
 
-    print(f"Saved: {output_path}")
+    print(f"Saved: {out_path}")
     return 0
 
 

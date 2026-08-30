@@ -2,12 +2,17 @@
 """MiniMax公式画像生成API（モデルID image-01）を呼び出して画像を生成し、指定パスに保存する。
 
 使い方:
-  generate_image_minimax.py <PROMPT> <OUTPUT_PATH> [REF_IMAGE] [ASPECT_RATIO]
+  generate_image_minimax.py <PROMPT> <OUTPUT_PATH> [REF_IMAGE] [ASPECT_RATIO] [N]
 
   REF_IMAGE: 参照画像のパス（省略可）。MiniMax API仕様上、参照画像は1枚のみ対応
              （OpenAI/Gemini方式と異なりカンマ区切り複数指定はできない）
   ASPECT_RATIO: "1:1", "16:9", "4:3", "3:2", "2:3", "3:4", "9:16", "21:9"
                 （省略時 "1:1"）
+  N: 1リクエストで生成する枚数（省略時 1）。指定可能範囲は1〜9
+     （MiniMax API `n` パラメータの制約。Text-to-Image/Image-to-Image共通）
+     2枚以上の場合、OUTPUT_PATH の拡張子の前に "_1", "_2", ... の連番を付けて
+     それぞれ保存する（例: out.png -> out_1.png, out_2.png）
+     料金は1枚あたり約$0.0035の単価がそのまま枚数分乗算される（割引なし）
 
 前提:
   - 環境変数 MINIMAX_API_KEY にAPIキーが設定されていること
@@ -43,10 +48,30 @@ def guess_mime(path: str) -> str:
     }.get(ext, "image/png")
 
 
+def numbered_path(output_path: str, index: int, total: int) -> Path:
+    """total>1の場合、拡張子の前に連番を付けたパスを返す。total==1ならそのまま。"""
+    p = Path(output_path)
+    if total <= 1:
+        return p
+    return p.with_name(f"{p.stem}_{index}{p.suffix}")
+
+
+def avoid_overwrite(path: Path) -> Path:
+    """pathがすでに存在する場合、拡張子の前に連番を付けて空いているパスを返す。"""
+    if not path.exists():
+        return path
+    i = 2
+    while True:
+        candidate = path.with_name(f"{path.stem}_{i}{path.suffix}")
+        if not candidate.exists():
+            return candidate
+        i += 1
+
+
 def main() -> int:
     if len(sys.argv) < 3:
         print(
-            "Usage: generate_image_minimax.py <PROMPT> <OUTPUT_PATH> [REF_IMAGE] [ASPECT_RATIO]",
+            "Usage: generate_image_minimax.py <PROMPT> <OUTPUT_PATH> [REF_IMAGE] [ASPECT_RATIO] [N]",
             file=sys.stderr,
         )
         return 1
@@ -55,6 +80,10 @@ def main() -> int:
     output_path = sys.argv[2]
     ref_image = sys.argv[3] if len(sys.argv) > 3 else ""
     aspect_ratio = sys.argv[4] if len(sys.argv) > 4 else "1:1"
+    n = int(sys.argv[5]) if len(sys.argv) > 5 and sys.argv[5] else 1
+    if not (1 <= n <= 9):
+        print("Error: N must be between 1 and 9", file=sys.stderr)
+        return 1
 
     api_key = os.environ.get("MINIMAX_API_KEY")
     if not api_key:
@@ -66,7 +95,7 @@ def main() -> int:
         "prompt": prompt,
         "aspect_ratio": aspect_ratio,
         "response_format": "base64",
-        "n": 1,
+        "n": n,
     }
 
     if ref_image:
@@ -99,16 +128,19 @@ def main() -> int:
         return 1
 
     try:
-        b64_data = body["data"]["image_base64"][0]
-    except (KeyError, IndexError, TypeError):
+        images = body["data"]["image_base64"]
+        if not images:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
         print("Error: unexpected response shape from MiniMax API", file=sys.stderr)
         return 1
 
-    out_path = Path(output_path)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_bytes(base64.b64decode(b64_data))
+    for i, b64_data in enumerate(images, start=1):
+        out_path = avoid_overwrite(numbered_path(output_path, i, len(images)))
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_bytes(base64.b64decode(b64_data))
+        print(f"Saved: {out_path}")
 
-    print(f"Saved: {output_path}")
     return 0
 
 

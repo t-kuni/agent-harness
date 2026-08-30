@@ -2,11 +2,16 @@
 """OpenAI gpt-image-2 API を呼び出して画像を生成し、指定パスに保存する。
 
 使い方:
-  generate_image.py <PROMPT> <OUTPUT_PATH> [REF_IMAGES] [SIZE]
+  generate_image.py <PROMPT> <OUTPUT_PATH> [REF_IMAGES] [SIZE] [N]
 
   REF_IMAGES: カンマ区切りの参照画像パス（省略可）
   SIZE: "WIDTHxHEIGHT" 形式（省略時 "auto"、モデルが自動選択、固定解像度ではない）
         幅・高さが16の倍数、長辺:短辺が3:1以内、総ピクセル数655,360〜8,294,400の制約あり
+  N: 1リクエストで生成する枚数（省略時 1）。指定可能範囲は1〜10
+     （OpenAI API `n` パラメータの制約。generations/edits 両エンドポイント共通）
+     2枚以上の場合、OUTPUT_PATH の拡張子の前に "_1", "_2", ... の連番を付けて
+     それぞれ保存する（例: out.png -> out_1.png, out_2.png）
+     料金は1枚あたりの単価がそのまま枚数分乗算される（割引なし）
 
 前提:
   - 環境変数 OPENAI_API_KEY にAPIキーが設定されていること
@@ -26,15 +31,39 @@ from pathlib import Path
 import requests
 
 
+def numbered_path(output_path: str, index: int, total: int) -> Path:
+    """total>1の場合、拡張子の前に連番を付けたパスを返す。total==1ならそのまま。"""
+    p = Path(output_path)
+    if total <= 1:
+        return p
+    return p.with_name(f"{p.stem}_{index}{p.suffix}")
+
+
+def avoid_overwrite(path: Path) -> Path:
+    """pathがすでに存在する場合、拡張子の前に連番を付けて空いているパスを返す。"""
+    if not path.exists():
+        return path
+    i = 2
+    while True:
+        candidate = path.with_name(f"{path.stem}_{i}{path.suffix}")
+        if not candidate.exists():
+            return candidate
+        i += 1
+
+
 def main() -> int:
     if len(sys.argv) < 3:
-        print("Usage: generate_image.py <PROMPT> <OUTPUT_PATH> [REF_IMAGES] [SIZE]", file=sys.stderr)
+        print("Usage: generate_image.py <PROMPT> <OUTPUT_PATH> [REF_IMAGES] [SIZE] [N]", file=sys.stderr)
         return 1
 
     prompt = sys.argv[1]
     output_path = sys.argv[2]
     ref_images = sys.argv[3] if len(sys.argv) > 3 else ""
     size = sys.argv[4] if len(sys.argv) > 4 else "auto"
+    n = int(sys.argv[5]) if len(sys.argv) > 5 and sys.argv[5] else 1
+    if not (1 <= n <= 10):
+        print("Error: N must be between 1 and 10", file=sys.stderr)
+        return 1
 
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
@@ -53,7 +82,7 @@ def main() -> int:
                 fh = open(img, "rb")
                 opened.append(fh)
                 files.append(("image[]", (Path(img).name, fh)))
-            data = {"model": "gpt-image-2", "prompt": prompt, "size": size}
+            data = {"model": "gpt-image-2", "prompt": prompt, "size": size, "n": n}
             resp = requests.post(
                 "https://api.openai.com/v1/images/edits",
                 headers=headers,
@@ -70,7 +99,7 @@ def main() -> int:
             "prompt": prompt,
             "size": size,
             "quality": "high",
-            "n": 1,
+            "n": n,
         }
         resp = requests.post(
             "https://api.openai.com/v1/images/generations",
@@ -91,16 +120,19 @@ def main() -> int:
         return 1
 
     try:
-        b64_data = body["data"][0]["b64_json"]
-    except (KeyError, IndexError, TypeError):
+        images = body["data"]
+        if not images:
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
         print("Error: unexpected response shape from OpenAI API", file=sys.stderr)
         return 1
 
-    out_path = Path(output_path)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_bytes(base64.b64decode(b64_data))
+    for i, item in enumerate(images, start=1):
+        out_path = avoid_overwrite(numbered_path(output_path, i, len(images)))
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_bytes(base64.b64decode(item["b64_json"]))
+        print(f"Saved: {out_path}")
 
-    print(f"Saved: {output_path}")
     return 0
 
 
