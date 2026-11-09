@@ -47,7 +47,7 @@ description: リサーチを実行し、結果を research/ に保存する。We
 ```bash
 WORKDIR="$(mktemp -d /tmp/agent-harness-research.XXXXXX)"
 (codex exec \
-  --model gpt-5.5 \
+  --model gpt-6.1-sol \
   --sandbox read-only \
   --ephemeral \
   --skip-git-repo-check \
